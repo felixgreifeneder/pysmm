@@ -3,8 +3,9 @@
   <component name="ChangeListManager">
     <list default="true" id="24d0b74a-b506-4a90-a641-33ea98f86150" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/source/conf.py" beforeDir="false" afterPath="$PROJECT_DIR$/docs/source/old/conf.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/source/index.rst" beforeDir="false" afterPath="$PROJECT_DIR$/docs/source/old/index.rst" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/source/conf.py" beforeDir="false" afterPath="$PROJECT_DIR$/docs/source/conf.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/source/index.rst" beforeDir="false" afterPath="$PROJECT_DIR$/docs/source/index.rst" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -133,6 +134,14 @@
     <state width="1238" height="394" key="GridCell.Tab.1.right/0.31.1280.640@0.31.1280.640" timestamp="1611349059622" />
     <state width="1878" height="274" key="GridCell.Tab.1.right/0.31.1920.1057@0.31.1920.1057" timestamp="1611147311401" />
     <state width="2006" height="390" key="GridCell.Tab.1.right/0.31.2048.1072@0.31.2048.1072" timestamp="1612433248339" />
+    <state x="513" y="203" width="1022" height="732" key="SettingsEditor" timestamp="1613767368425">
+      <screen x="0" y="31" width="2048" height="1072" />
+    </state>
+    <state x="513" y="203" width="1022" height="732" key="SettingsEditor/0.31.2048.1072@0.31.2048.1072" timestamp="1613767368425" />
+    <state x="619" y="304" width="806" height="530" key="Vcs.Push.Dialog.v2" timestamp="1613754719665">
+      <screen x="0" y="31" width="2048" height="1072" />
+    </state>
+    <state x="619" y="304" width="806" height="530" key="Vcs.Push.Dialog.v2/0.31.2048.1072@0.31.2048.1072" timestamp="1613754719665" />
     <state x="342" y="177" width="950" height="586" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1" timestamp="1611262153624">
       <screen x="0" y="31" width="1280" height="640" />
     </state>

@@ -11,8 +11,10 @@ for spatial and temporal mapping of surface soil moisture are fully executed onl
 needs to be downloaded.</p>
 
 <p>
-Acknowledgements: This study was made possibly through funding within the Horizon 2020 project "Ecopotential: Improving
-Future Ecosystem Benefits through Earth Observations"
+Acknowledgements: This work was partially funded by the Horizon 2020 project "Ecopotential – 
+Improving Future Ecosystem Benefits through Earth Observation, which has received funding from the European Research
+Council (ERC) under the European Union's Horizon 2020 research and innovation programme
+(grant agreement n° 641762) and the European Fund for Regional Development project "DPS4ESLAB".
 </p>
 
 <p>

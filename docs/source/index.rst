@@ -26,8 +26,10 @@ was performed based on in-situ data from the International Soil Moisture Network
 for spatial and temporal mapping of surface soil moisture are fully executed online on GEE - none of the input data-sets
 needs to be downloaded.
 
-Acknowledgements: This study was made possibly through funding within the Horizon 2020 project "Ecopotential: Improving
-Future Ecosystem Benefits through Earth Observations"
+Acknowledgements: This work was partially funded by the Horizon 2020 project "Ecopotential –
+Improving Future Ecosystem Benefits through Earth Observation, which has received funding from the European Research
+Council (ERC) under the European Union's Horizon 2020 research and innovation programme
+(grant agreement n° 641762) and the European Fund for Regional Development project "DPS4ESLAB".
 
 .. image:: _static/logoEURAC.jpg
 .. image:: _static/ecopo_small.png
@@ -87,7 +89,7 @@ To produce a soil moisture map of any geographic extent use the following functi
 
 * the output of ``get_map()`` is directly exported to the GEE asset with the following path *'path/to/outdir/'*
 
-!! The time series extraction is currently not supported !!
+**The time series extraction is currently not supported**
 
 get_ts()
 --------
