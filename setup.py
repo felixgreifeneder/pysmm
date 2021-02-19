@@ -1,4 +1,5 @@
 from setuptools import setup
+from setuptools import find_packages
 
 setup(name='pysmm',
       version='0.6',
@@ -12,10 +13,12 @@ setup(name='pysmm',
       author='Felix Greifeneder',
       author_email='felix.greifeneder@eurac.edu',
       license='GPLv3',
-      packages=['pysmm'],
+      packages=find_packages(),
       install_requires=['earthengine-api',
                         'google-api-python-client',
-                        'cryptography',
+                        'google-api-python-client',
+                        'google-auth-httplib2',
+                        'google-auth-oauthlib',
                         'matplotlib',
                         'numpy',
                         'pandas',

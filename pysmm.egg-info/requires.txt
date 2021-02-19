@@ -1,9 +1,11 @@
 earthengine-api
 google-api-python-client
-cryptography
+google-api-python-client
+google-auth-httplib2
+google-auth-oauthlib
 matplotlib
 numpy
 pandas
 pytesmo
-scikit-learn==0.19.0
+scikit-learn
 scipy

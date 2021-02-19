@@ -1,13 +1,13 @@
-from __future__ import print_function
-import httplib2
+
+from __future__ import print_functione
 import os
-from apiclient import discovery
-from oauth2client import client
-from oauth2client import tools
-from oauth2client.file import Storage
+from googleapiclient.discovery import build
+from google_auth_oauthlib.flow import InstalledAppFlow
+from google.auth.transport.requests import Request
 from googleapiclient.http import MediaIoBaseDownload
 import io
 import numpy as np
+import pickle
 
 
 class gdrive(object):
@@ -17,9 +17,11 @@ class gdrive(object):
         # If modifying these scopes, delete your previously saved credentials
         # at ~/.credentials/drive-python-quickstart.json
         self.SCOPES = 'https://www.googleapis.com/auth/drive'
-        self.CLIENT_SECRET_FILE = 'client_secret.json'
-        self.APPLICATION_NAME = 'Drive API Python Quickstart'
+        self.CLIENT_SECRET_FILE = 'credentials.json'
+        self.APPLICATION_NAME = 'pysmm'
+        self.CLIENT_ID = ' 953901556634-sllldoe5aaoeg0arom97llbbdlcu2fsc.apps.googleusercontent.com '
 
+        self._init_connection()
 
     def _get_credentials(self):
         """Gets valid user credentials from storage.
@@ -31,38 +33,32 @@ class gdrive(object):
             Credentials, the obtained credential.
         """
 
-        home_dir = os.path.expanduser('~')
-        credential_dir = os.path.join(home_dir, '.credentials')
-        if not os.path.exists(credential_dir):
-            os.makedirs(credential_dir)
-        credential_path = os.path.join(credential_dir,
-                                       'drive-python-quickstart.json')
-
-        store = Storage(credential_path)
-        credentials = store.get()
-        if not credentials or credentials.invalid:
-            flow = client.flow_from_clientsecrets(self.CLIENT_SECRET_FILE, self.SCOPES)
-            flow.user_agent = self.APPLICATION_NAME
-
-            credentials = tools.run(flow, store)
-            print('Storing credentials to ' + credential_path)
-        return credentials
-
+        creds = None
+        # The file token.pickle stores the user's access and refresh tokens, and is
+        # created automatically when the authorization flow completes for the first
+        # time.
+        if os.path.exists('./pysmm/token.pickle'):
+            with open('./pysmm/token.pickle', 'rb') as token:
+                creds = pickle.load(token)
+        # If there are no (valid) credentials available, let the user log in.
+        if not creds or not creds.valid:
+            if creds and creds.expired and creds.refresh_token:
+                creds.refresh(Request())
+            else:
+                flow = InstalledAppFlow.from_client_secrets_file(
+                    './pysmm/credentials.json', self.SCOPES)
+                creds = flow.run_local_server(port=0)
+            # Save the credentials for the next run
+            with open('./pysmm/token.pickle', 'wb') as token:
+                pickle.dump(creds, token)
+        return creds
 
     def _init_connection(self):
-
         credentials = self._get_credentials()
-        http = credentials.authorize(httplib2.Http())
-        service = discovery.build('drive', 'v3', http=http)
-
-        return(http, service)
-
+        self.service = build('drive', 'v3', credentials=credentials)
 
     def print_file_list(self):
-
-        http, service = self._init_connection()
-
-        results = service.files().list(
+        results = self.service.files().list(
             pageSize=30, fields="nextPageToken, files(id, name)").execute()
         items = results.get('files', [])
         if not items:
@@ -72,13 +68,10 @@ class gdrive(object):
             for item in items:
                 print('{0} ({1})'.format(item['name'], item['id']))
 
-
     def get_id(self, filename):
 
-        http, service = self._init_connection()
-
         # get list of files
-        results = service.files().list(
+        results = self.service.files().list(
             pageSize=50, fields="nextPageToken, files(id, name)").execute()
         items = results.get('files', [])
 
@@ -92,11 +85,7 @@ class gdrive(object):
         else:
             return(1, idlist[file_pos])
 
-
     def download_file(self, filename, localpath):
-
-        http, service = self._init_connection()
-
         # get file id
         success, fId = self.get_id(filename)
 
@@ -104,7 +93,7 @@ class gdrive(object):
             print(filename + ' not found')
             return
 
-        request = service.files().get_media(fileId=fId[0])
+        request = self.service.files().get_media(fileId=fId[0])
         fh = io.BytesIO()
         downloader = MediaIoBaseDownload(fh, request)
         done = False
@@ -116,15 +105,14 @@ class gdrive(object):
         fo.write(fh.getvalue())
         fo.close()
 
-
     def delete_file(self, filename):
-
-        http, service = self._init_connection()
-
         # get file id
         success, fId = self.get_id(filename)
 
         if success == 0:
             print(filename + ' not found')
 
-        service.files().delete(fileId=fId[0]).execute()
+        self.service.files().delete(fileId=fId[0]).execute()
+
+    # def close(self):
+    #     self.service.close()
