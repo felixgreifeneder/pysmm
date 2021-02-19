@@ -1,0 +1,193 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Welcome to pysmm’s documentation! &#8212; pysmm 2021 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="welcome-to-pysmm-s-documentation">
+<h1>Welcome to pysmm’s documentation!<a class="headerlink" href="#welcome-to-pysmm-s-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+</div>
+<div class="section" id="python-sentinel-1-soil-moisture-mapping-toolbox-pysmm">
+<span id="welcome"></span><h1>PYthon Sentinel-1 soil-Moisture Mapping Toolbox (PYSMM)<a class="headerlink" href="#python-sentinel-1-soil-moisture-mapping-toolbox-pysmm" title="Permalink to this headline">¶</a></h1>
+<p>This package acts as an interface to Google Earth Engine for the estimation of surface soil moisture based
+on Copernicus Sentinel-1 intensity data. It is meant as a supplement to the following publication: <em>Greifeneder, F.,
+C. Notarnicola, W. Wagner. A machine learning based approach for global surface soil moisture estimations with Google
+Earth Engine.</em>
+The estimation of soil moisture is based on a Gradient Boosting Trees Regression machine learning approach. The model training
+was performed based on in-situ data from the International Soil Moisture Network (ISMN). PYSMM all processing steps
+for spatial and temporal mapping of surface soil moisture are fully executed online on GEE - none of the input data-sets
+needs to be downloaded.</p>
+<p>Acknowledgements: This study was made possibly through funding within the Horizon 2020 project “Ecopotential: Improving
+Future Ecosystem Benefits through Earth Observations”</p>
+<img alt="_images/logoEURAC.jpg" src="_images/logoEURAC.jpg" />
+<img alt="_images/ecopo_small.png" src="_images/ecopo_small.png" />
+</div>
+<div class="section" id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<p>Most of the data processing is executed on-line on Google Earth Engine.
+Therefore, the execution of this script requires a Google account and access to Google Earth Engine -
+we are working on an updated version that will utilize a GEE Application Key rather than a personal account.</p>
+<p><strong>Installation of the Google Earth Engine API</strong></p>
+<p>To allow the script to talk to Google Earh Engine the API has to be installed. Please follow the instructions at
+this link <a class="reference external" href="https://developers.google.com/earth-engine/python_install_manual">GEE API</a></p>
+<p>Install PYSMM by running:</p>
+<p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pysmm</span></code></p>
+<p>or</p>
+<p><code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://gitlab.inf.unibz.it/Felix.Greifeneder/pysmm</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">install</span></code></p>
+</div>
+<div class="section" id="api-documentation">
+<h1>API Documentation<a class="headerlink" href="#api-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="get-map">
+<h2>get_map()<a class="headerlink" href="#get-map" title="Permalink to this headline">¶</a></h2>
+<p>To produce a soil moisture map of any geographic extent use the following function:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pysmm.derive_SM</span> <span class="k">import</span> <span class="n">get_map</span>
+<span class="n">get_map</span><span class="p">(</span><span class="o">*</span><span class="n">minlon</span><span class="o">*</span><span class="p">,</span> <span class="o">*</span><span class="n">minlat</span><span class="o">*</span><span class="p">,</span> <span class="o">*</span><span class="n">maxlon</span><span class="o">*</span><span class="p">,</span> <span class="o">*</span><span class="n">maxlat</span><span class="o">*</span><span class="p">,</span>
+        <span class="s1">&#39;path/to/outdir/&#39;</span><span class="p">,</span>
+        <span class="n">samping</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>                             <span class="c1"># specify desired output resolution</span>
+        <span class="n">year</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">month</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">day</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>        <span class="c1"># define a date (optional)</span>
+        <span class="n">tracknr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>                           <span class="c1"># define the Sentinel-1 track (optinal)</span>
+        <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">stop</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>                              <span class="c1"># if no specific date is specified, a start and end date can be</span>
+                                                <span class="c1"># set for the extraction of surface soil moisture maps</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>in case <em>year</em>, <em>month</em>, and <em>day</em> are not specified, the entire time-series will be extracted</p></li>
+<li><p><em>overwrite=True</em> allows to specify whether existing files should be overwritten or skipped.</p></li>
+<li><p>the output of <code class="docutils literal notranslate"><span class="pre">get_map()</span></code> is directly exported to the GEE asset with the following path <em>‘path/to/outdir/’</em></p></li>
+</ul>
+<p>!! The time series extraction is currently not supported !!</p>
+</div>
+<div class="section" id="get-ts">
+<h2>get_ts()<a class="headerlink" href="#get-ts" title="Permalink to this headline">¶</a></h2>
+<p>To derive the soil moisture time-series of a single location use <code class="docutils literal notranslate"><span class="pre">get_ts()</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pysmm.derive_SM</span> <span class="k">import</span> <span class="n">get_ts</span>
+<span class="n">sm_ts</span> <span class="o">=</span> <span class="n">ge_ts</span><span class="p">(</span><span class="o">*</span><span class="n">lon</span><span class="o">*</span><span class="p">,</span> <span class="o">*</span><span class="n">lat</span><span class="o">*</span><span class="p">,</span>
+              <span class="s1">&#39;/path/to/working_dir/&#39;</span><span class="p">,</span>
+              <span class="n">tracknr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>                 <span class="c1"># define an optional Sentinel-1 track-nr filter</span>
+              <span class="n">footprint</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>                 <span class="c1"># specify the footprint of the extracted time-series</span>
+              <span class="n">masksnow</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+              <span class="n">calc_anomalies</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+              <span class="n">create_plots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>The output of <em>get_ts</em> is a pandas time-series</p></li>
+<li><p>if <em>masksnow=True</em>, an automatically generated wet-snow mask is applied to the output</p></li>
+<li><p>if <em>calc_anomalies=True</em>, anomalies are generated in addition to absolute soil moisture values.
+For details about the anomaly computation, see: <em>Greifeneder F, E Khamala, D Sendabo, W Wagner, M Zebisch, H Farah,
+C Notarnicola. Detection of soil moisture anomalies based on Sentinel-1. Physics and Chemistry of the Earth (submitted,
+March 2018)</em></p></li>
+<li><p>if <em>create_plots=True</em>, time-series plots are created and saved to <em>‘path/to/working_dir’</em></p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="contribute">
+<h1>Contribute<a class="headerlink" href="#contribute" title="Permalink to this headline">¶</a></h1>
+<p>Issue Tracker: <a class="reference external" href="https://gitlab.inf.unibz.it/Felix.Greifeneder/pysmm/issues">https://gitlab.inf.unibz.it/Felix.Greifeneder/pysmm/issues</a></p>
+<p>Source Code: <a class="reference external" href="https://gitlab.inf.unibz.it/Felix.Greifeneder/pysmm">https://gitlab.inf.unibz.it/Felix.Greifeneder/pysmm</a></p>
+</div>
+<div class="section" id="contact">
+<h1>Contact<a class="headerlink" href="#contact" title="Permalink to this headline">¶</a></h1>
+<p>If you are having issues, please let us know.
+Mail to: <a class="reference external" href="mailto:felix&#46;greifeneder&#37;&#52;&#48;eurac&#46;edu">felix<span>&#46;</span>greifeneder<span>&#64;</span>eurac<span>&#46;</span>edu</a></p>
+</div>
+<div class="section" id="license">
+<h1>License<a class="headerlink" href="#license" title="Permalink to this headline">¶</a></h1>
+<p>The project is licensed under the GNU GENERAL PUBLIC LICENSE Version 3</p>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">pysmm</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, Felix Greifeneder.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
