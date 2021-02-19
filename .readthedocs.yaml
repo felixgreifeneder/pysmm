@@ -14,7 +14,7 @@ python:
    version: 3.7
 
 conda:
-   environment: pysmm_v02.yml
+   environment: environment.yml
 
 build:
    image: latest

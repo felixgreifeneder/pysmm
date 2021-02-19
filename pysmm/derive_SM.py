@@ -1,9 +1,6 @@
 from pysmm.GEE_wrappers import GEE_extent
-# from pysmm.GEE_wrappers import GEE_pt
 import numpy as np
 import os
-import matplotlib.pyplot as plt
-import pandas as pd
 import math
 import datetime as dt
 

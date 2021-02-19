@@ -2,17 +2,17 @@ from __future__ import print_function
 import ee
 import numpy as np
 import datetime as dt
-import pandas as pd
 import math
-from pysmm.utils import gdrive
 import time
-import pickle
 import os
-import matplotlib.pyplot as plt
-import pytesmo.time_series.anomaly as anomaly
-from pytesmo.time_series.plotting import plot_clim_anom
-from sklearn.linear_model import LinearRegression
-from pytesmo.temporal_matching import df_match
+# import matplotlib.pyplot as plt
+# import pytesmo.time_series.anomaly as anomaly
+# from pytesmo.time_series.plotting import plot_clim_anom
+# from sklearn.linear_model import LinearRegression
+# from pytesmo.temporal_matching import df_match
+# import pandas as pd
+# from pysmm.utils import gdrive
+# import pickle
 
 
 # class GEE_pt(object):
