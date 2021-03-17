@@ -2,7 +2,7 @@ from setuptools import setup
 from setuptools import find_packages
 
 setup(name='pysmm',
-      version='0.6',
+      version='0.6.1',
       description='Python Sentinel Soil-Moisture Mapping',
       long_description='For detailed documentation go-to http://pysmm.readthedocs.io/en/latest/',
       classifiers=[

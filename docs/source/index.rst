@@ -105,16 +105,16 @@ To derive the soil moisture time-series of a single location use ``get_ts()``::
                   names=None,
                   export_csv=None)
 
-Atributes:
-         loc: (tuple or list of tuples) longitude and latitude in decimal degrees
-         workpath: destination for output files
-         tracknr (optional): Use data from a specific Sentinel-1 track only
-         footprint: time-series footprint
-         masksnow: apply automatic wet snow mask
-         calc_anomalies: (boolean) calculate anomalies
-         create_plots: (boolean) generate and save time-series plots to workpath
-         names: (string or list of strings, optional): list of time-series names
-         export_csv: (string, optional) set file name for the export of the SM time-series to a csv,
+Attributes:
+         *loc: (tuple or list of tuples) longitude and latitude in decimal degrees
+         *workpath: destination for output files
+         *tracknr (optional): Use data from a specific Sentinel-1 track only
+         *footprint: time-series footprint
+         *masksnow: apply automatic wet snow mask
+         *calc_anomalies: (boolean) calculate anomalies
+         *create_plots: (boolean) generate and save time-series plots to workpath
+         *names: (string or list of strings, optional): list of time-series names
+         *export_csv: (string, optional) set file name for the export of the SM time-series to a csv,
                        if None, no export is performed
 Returns:
          Pandas series
