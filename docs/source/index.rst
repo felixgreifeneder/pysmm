@@ -89,7 +89,6 @@ To produce a soil moisture map of any geographic extent use the following functi
 
 * the output of ``get_map()`` is directly exported to the GEE asset with the following path *'path/to/outdir/'*
 
-**The time series extraction is currently not supported**
 
 get_ts()
 --------
@@ -97,24 +96,28 @@ get_ts()
 To derive the soil moisture time-series of a single location use ``get_ts()``::
 
     from pysmm.derive_SM import get_ts
-    sm_ts = ge_ts(*lon*, *lat*,
-                  '/path/to/working_dir/',
-                  tracknr=None,                 # define an optional Sentinel-1 track-nr filter
-                  footprint=50,                 # specify the footprint of the extracted time-series
-                  masksnow=True,
-                  calc_anomalies=True,
-                  create_plots=True)
+    sm_ts = ge_ts(*loc*,
+                  workpath,
+                  tracknr=None,
+                  footprint=50,
+                  calc_anomalies=False,
+                  create_plots=False,
+                  names=None,
+                  export_csv=None)
 
-* The output of *get_ts* is a pandas time-series
-
-* if *masksnow=True*, an automatically generated wet-snow mask is applied to the output
-
-* if *calc_anomalies=True*, anomalies are generated in addition to absolute soil moisture values.
-  For details about the anomaly computation, see: *Greifeneder F, E Khamala, D Sendabo, W Wagner, M Zebisch, H Farah,
-  C Notarnicola. Detection of soil moisture anomalies based on Sentinel-1. Physics and Chemistry of the Earth (submitted,
-  March 2018)*
-
-* if *create_plots=True*, time-series plots are created and saved to *'path/to/working_dir'*
+Atributes:
+         loc: (tuple or list of tuples) longitude and latitude in decimal degrees
+         workpath: destination for output files
+         tracknr (optional): Use data from a specific Sentinel-1 track only
+         footprint: time-series footprint
+         masksnow: apply automatic wet snow mask
+         calc_anomalies: (boolean) calculate anomalies
+         create_plots: (boolean) generate and save time-series plots to workpath
+         names: (string or list of strings, optional): list of time-series names
+         export_csv: (string, optional) set file name for the export of the SM time-series to a csv,
+                       if None, no export is performed
+Returns:
+         Pandas series
 
 .. _contribute
 
