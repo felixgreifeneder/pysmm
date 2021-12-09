@@ -1672,7 +1672,7 @@ class GEE_extent(object):
                     mask_snow_frozen_GLDAS=False)
 
         self.get_sand_content()
-        # self.get_clay_content()
+        self.get_clay_content()
         self.get_bulk_density()
 
         self.OVERWRITE = overwrite
@@ -1691,9 +1691,10 @@ class GEE_extent(object):
             tmp = ee.Image(image)
 
             # Covert to linear
-            out = ee.Image(10).pow(tmp.select('VV_gamma0vol').divide(10))
+            out = ee.Image(10).pow(tmp.select(['VV_gamma0vol', 'VV_gamma0surf', 'VH_gamma0surf']).divide(10))
             # rename
-            out = out.select(['constant'], ['VV_gamma0vol'])
+            #out = out.select(['constant_0', 'constant_2', 'constant_3'],
+            #                 ['VV_gamma0vol', 'VV_gamma0surf', 'VH_gamma0surf'])
 
             return out.set('system:time_start', tmp.get('system:time_start'))
 
@@ -1743,6 +1744,7 @@ class GEE_extent(object):
         doi = self.S1_DATE
         s1_selected = ee.Image(gee_s1_filtered.map(getddist).sort('dateDist').first())
         s1_g0vol = s1_selected.select(['VV_gamma0vol', 'VH_gamma0vol'])
+        s1_g0surf = s1_selected.select(['VV_gamma0surf', 'VH_gamma0surf'])
 
         if tempfilter == True:
             # despeckle
@@ -1760,35 +1762,40 @@ class GEE_extent(object):
 
         # extract information
         s1_g0vol_vv = s1_g0vol.select('VV_gamma0vol')
+        s1_g0vol_vh = s1_g0vol.select('VH_gamma0vol')
+        s1_g0surf_vv = s1_g0surf.select('VV_gamma0surf')
+        s1_g0surf_vh = s1_g0surf.select('VH_gamma0surf')
 
         # calculate statistical moments
-        gee_s1_filtered = gee_s1_filtered.filterDate(str(doi.year) + '-01-01', str(doi.year) + '-12-31').select('VV_gamma0vol')
+        gee_s1_filtered = gee_s1_filtered.filterDate(str(doi.year) + '-01-01', str(doi.year) + '-12-31')#.select('VV_gamma0vol')
         gee_s1_lin = gee_s1_filtered.map(tolin)
 
         # check if median was alread computed
-        tmpcoords = self.roi.getInfo()['coordinates']
-        mean_asset_path = 's1med_' + str(abs(tmpcoords[0][0][0])) + \
-                          '_' + str(abs(tmpcoords[0][0][1])) + '_' + \
-                          str(abs(tmpcoords[0][2][0])) + \
-                          '_' + str(abs(tmpcoords[0][2][1])) + \
-                          '_' + str(self.sampling) + '_' + str(self.TRACK_NR) + '_' + str(doi.year)
-        mean_asset_path = mean_asset_path.replace('.', '')
-        mean_gvv_v = ee.Image('users/felixgreifeneder/' + mean_asset_path)
-        try:
-            mean_gvv_v.getInfo()
-            print('S1 median exists')
-        except:
-            # compute median
-            mean_gvv_v = ee.Image(gee_s1_lin.select('VV_gamma0vol').reduce(ee.Reducer.median(), parallelScale=16))
+        # tmpcoords = self.roi.getInfo()['coordinates']
+        # mean_asset_path = 's1med_' + str(abs(tmpcoords[0][0][0])) + \
+        #                   '_' + str(abs(tmpcoords[0][0][1])) + '_' + \
+        #                   str(abs(tmpcoords[0][2][0])) + \
+        #                   '_' + str(abs(tmpcoords[0][2][1])) + \
+        #                   '_' + str(self.sampling) + '_' + str(self.TRACK_NR) + '_' + str(doi.year)
+        # mean_asset_path = mean_asset_path.replace('.', '')
+        # mean_gvv_v = ee.Image('users/felixgreifeneder/' + mean_asset_path)
+        # try:
+        #     mean_gvv_v.getInfo()
+        #     print('S1 median exists')
+        # except:
+        # compute median
+        mean_gvv_v = ee.Image(gee_s1_lin.select('VV_gamma0vol').reduce(ee.Reducer.median(), parallelScale=16))
+        mean_gvv_s = ee.Image(gee_s1_lin.select('VV_gamma0surf').reduce(ee.Reducer.median(), parallelScale=16))
+        mean_gvh_s = ee.Image(gee_s1_lin.select('VH_gamma0surf').reduce(ee.Reducer.median(), parallelScale=16))
 
-            # export asset
-            self.GEE_2_asset(raster=mean_gvv_v, name=mean_asset_path, timeout=False, outdir='')
-            mean_gvv_v = ee.Image('users/felixgreifeneder/' + mean_asset_path)
+        # export asset
+        # self.GEE_2_asset(raster=mean_gvv_v, name=mean_asset_path, timeout=False, outdir='')
+        # mean_gvv_v = ee.Image('users/felixgreifeneder/' + mean_asset_path)
 
         # std_gvv_v = ee.Image(gee_s1_lin.select('VV_gamma0vol').reduce(ee.Reducer.stdDev(), parallelScale=24))
         # g0 - surf
-        # k1gvv_s = ee.Image(gee_s1_ln.select('VV_gamma0surf').reduce(ee.Reducer.mean(), parallelScale=24))
-        # k2gvv_s = ee.Image(gee_s1_ln.select('VV_gamma0surf').reduce(ee.Reducer.stdDev(), parallelScale=24))
+        k1gvv_s = ee.Image(gee_s1_filtered.select('VV_gamma0surf').reduce(ee.Reducer.mean(), parallelScale=24))
+        k2gvv_s = ee.Image(gee_s1_filtered.select('VV_gamma0surf').reduce(ee.Reducer.stdDev(), parallelScale=24))
         # k3gvv_s = ee.Image(gee_s1_ln.select('VV_gamma0surf').reduce(ee.Reducer.skew(), parallelScale=24))
         # k4gvv_s = ee.Image(gee_s1_ln.select('VV_gamma0surf').reduce(ee.Reducer.kurtosis(), parallelScale=24))
         # mean_gvv_s = ee.Image(gee_s1_lin.select('VV_gamma0surf').reduce(ee.Reducer.mean(), parallelScale=24))
@@ -1821,6 +1828,12 @@ class GEE_extent(object):
         # self.S1_SIG0_VV_db = s1_sig0_vv
         self.S1_G0VOL_VV_db = s1_g0vol_vv
         self.S1G0VOLMEAN_VV = ee.Image(10).multiply(mean_gvv_v.log10()).copyProperties(mean_gvv_v)
+        self.S1_G0SURF_VV_db = s1_g0surf_vv
+        self.S1_G0SURF_VH_db = s1_g0surf_vh
+        self.S1G0SURFMEAN_VV = ee.Image(10).multiply(mean_gvv_s.log10()).copyProperties(mean_gvv_s)
+        self.S1G0SURFMEAN_VH = ee.Image(10).multiply(mean_gvh_s.log10()).copyProperties(mean_gvh_s)
+        self.K1G0VV_V = k1gvv_s
+        self.K2G0VV_V = k2gvv_s
 
     def estimate_SM_GBR_1step(self):
         # load GBR models
@@ -1828,38 +1841,67 @@ class GEE_extent(object):
         import sys
 
         g0_v_vv = self.S1_G0VOL_VV_db
+        g0_s_vv = self.S1_G0SURF_VV_db
+        g0_s_vh = self.S1_G0SURF_VH_db
         dg0_v_vv = g0_v_vv.subtract(self.S1G0VOLMEAN_VV)
+        dg0_s_vv = g0_s_vv.subtract(self.S1G0SURFMEAN_VV)
+        dg0_s_vh = g0_s_vh.subtract(self.S1G0SURFMEAN_VH)
+        g0_v_vv_k1 = self.K1G0VV_V
+        g0_v_vv_k2 = self.K2G0VV_V
         crops = self.CROPS_COVER
         grass = self.GRASS_COVER
         moss = self.MOSS_COVER
+        l8b1 = self.L8_IMG.select('B1')
+        l8b2 = self.L8_IMG.select('B2')
+        l8b3 = self.L8_IMG.select('B3')
+        l8b3med = self.L8_MEAN.select('B3_median')
         l8b4 = self.L8_IMG.select('B4')
         l8b4med = self.L8_MEAN.select('B4_median')
         l8b5 = self.L8_IMG.select('B5')
         l8b5med = self.L8_MEAN.select('B5_median')
-        l8b11 = self.L8_IMG.select('B11')
-        l8b11med = self.L8_MEAN.select('B11_median')
+        l8b6 = self.L8_IMG.select('B6')
+        l8b7med = self.L8_MEAN.select('B7_median')
+        l8b10 = self.L8_IMG.select('B10')
+        l8dt = self.L8_DDATE
         ndvi = self.EVI_IMG
         ndvi_med = self.EVI_MEAN
         bulk = self.BULK
+        clay = self.CLAY
         sand = self.SAND
 
         input_image1 = ee.Image([dg0_v_vv.toFloat(),
+                                 g0_s_vv.toFloat(),
+                                 g0_s_vh.toFloat(),
+                                 dg0_s_vv.toFloat(),
+                                 dg0_s_vh.toFloat(),
+                                 g0_v_vv_k1.toFloat(),
+                                 g0_v_vv_k2.toFloat(),
                                  crops.toFloat(),
                                  grass.toFloat(),
                                  moss.toFloat(),
+                                 l8b1.toFloat(),
+                                 l8b2.toFloat(),
+                                 l8b3.toFloat(),
+                                 l8b3med.toFloat(),
                                  l8b4.toFloat(),
                                  l8b4med.toFloat(),
                                  l8b5.toFloat(),
                                  l8b5med.toFloat(),
-                                 l8b11.toFloat(),
-                                 l8b11med.toFloat(),
+                                 l8b6.toFloat(),
+                                 l8b7med.toFloat(),
+                                 l8b10.toFloat(),
+                                 l8dt.toFloat(),
                                  ndvi.toFloat(),
                                  ndvi_med.toFloat(),
                                  bulk.toFloat(),
+                                 clay.toFloat(),
                                  sand.toFloat()])
 
-        input_image1 = input_image1.rename(['dg0_v_vv', 'crops', 'grass', 'moss', 'l8b4', 'l8b4_med', 'l8b5',
-                                            'l8b5_med', 'l8b11', 'l8b11_med', 'ndvi', 'ndvi_med', 'bulk', 'sand'])
+        input_image1 = input_image1.rename(['dg0_v_vv', 'g0_s_vv', 'g0_s_vh', 'dg0_s_vv', 'dg0_s_vh',
+                                            'g0_v_vv_k1', 'g0_v_vv_k2', 'crops', 'grass', 'moss', 'l8_b1',
+                                            'l8_b2', 'l8_b3', 'l8_b3_med', 'l8_b4', 'l8_b4_med', 'l8_b5',
+                                            'l8_b5_med', 'l8_b6', 'l8_b7_med', 'l8_b10', 'l8_dt', 'ndvi',
+                                            'ndvi_med', 'bulk', 'clay', 'sand'])
 
         ipt_img_mask1 = input_image1.mask().reduce(ee.Reducer.allNonZero())
 
@@ -2008,7 +2050,12 @@ class GEE_extent(object):
                                                  ee.Image(dem),
                                                  model)
 
-        gee_s1_filtered = gee_s1_fltd_vol
+        model = 'surface'
+        gee_s1_fltd_surf = self._slope_correction(gee_s1_filtered,
+                                                  ee.Image(dem),
+                                                  model)
+
+        gee_s1_filtered = gee_s1_fltd_vol.combine(gee_s1_fltd_surf, overwrite=True)
 
         # apply no data mask
         def mask_no_data(image):
@@ -2143,7 +2190,7 @@ class GEE_extent(object):
         gee_l8_collection_all = ee.ImageCollection('LANDSAT/LC08/C01/T1_SR')
 
         # apply landsat mask
-        gee_l8_collection_all = gee_l8_collection_all.map(mask).select(['B4', 'B5', 'B11'])
+        gee_l8_collection_all = gee_l8_collection_all.map(mask)#.select(['B4', 'B5', 'B11'])
 
         def date_mosaic(image):
 
@@ -2276,7 +2323,7 @@ class GEE_extent(object):
         gee_l8_collection_all = ee.ImageCollection('LANDSAT/LC08/C01/T1_SR')
 
         # apply landsat mask
-        gee_l8_collection = gee_l8_collection_all.map(mask).select(['B4', 'B5', 'B11'])
+        gee_l8_collection = gee_l8_collection_all.map(mask)#.select(['B4', 'B5', 'B11'])
 
         if date is None:
             doi = self.S1_DATE
