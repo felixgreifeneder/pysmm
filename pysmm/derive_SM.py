@@ -80,7 +80,7 @@ def get_map(minlon, minlat, maxlon, maxlat,
 
             # initialise retrieval
             GEE_interface.init_SM_retrieval(dateI.year, dateI.month, dateI.day, hour=dateI.hour, minute=dateI.minute,
-                                            track=orbitI)
+                                            track=orbitI, overwrite=overwrite)
 
             if GEE_interface.ORBIT == 'ASCENDING':
                 orbit_prefix = 'A'
@@ -95,15 +95,15 @@ def get_map(minlon, minlat, maxlon, maxlat,
                       '{:02d}'.format(GEE_interface.S1_DATE.second) + '_' + \
                       '{:03d}'.format(math.trunc(GEE_interface.TRACK_NR)) + '_' + orbit_prefix
 
-            if overwrite == False and os.path.exists(outpath + outname + '.tif'):
-                print(outname + ' already done')
-                continue
+            # if overwrite == False and os.path.exists(outpath + outname + '.tif'):
+            #     print(outname + ' already done')
+            #     continue
 
             # Estimate soil moisture
             GEE_interface.estimate_SM_GBR_1step()
 
             if GEE_interface.ESTIMATED_SM is not None:
-                GEE_interface.GEE_2_asset(name=outname, timeout=False, outdir='CALI2')
+                GEE_interface.GEE_2_asset(name=outname, timeout=False)
 
         GEE_interface = None
 

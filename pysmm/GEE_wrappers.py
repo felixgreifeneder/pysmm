@@ -1691,7 +1691,7 @@ class GEE_extent(object):
             tmp = ee.Image(image)
 
             # Covert to linear
-            out = ee.Image(10).pow(tmp.select(['VV_gamma0vol', 'VV_gamma0surf', 'VH_gamma0surf']).divide(10))
+            out = ee.Image(10).pow(tmp.select(['VV_gamma0vol', 'VH_gamma0vol', 'VV_gamma0surf', 'VH_gamma0surf']).divide(10))
             # rename
             #out = out.select(['constant_0', 'constant_2', 'constant_3'],
             #                 ['VV_gamma0vol', 'VV_gamma0surf', 'VH_gamma0surf'])
@@ -1785,6 +1785,7 @@ class GEE_extent(object):
         # except:
         # compute median
         mean_gvv_v = ee.Image(gee_s1_lin.select('VV_gamma0vol').reduce(ee.Reducer.median(), parallelScale=16))
+        mean_gvh_v = ee.Image(gee_s1_lin.select('VH_gamma0vol').reduce(ee.Reducer.median(), parallelScale=16))
         mean_gvv_s = ee.Image(gee_s1_lin.select('VV_gamma0surf').reduce(ee.Reducer.median(), parallelScale=16))
         mean_gvh_s = ee.Image(gee_s1_lin.select('VH_gamma0surf').reduce(ee.Reducer.median(), parallelScale=16))
 
@@ -1794,8 +1795,12 @@ class GEE_extent(object):
 
         # std_gvv_v = ee.Image(gee_s1_lin.select('VV_gamma0vol').reduce(ee.Reducer.stdDev(), parallelScale=24))
         # g0 - surf
-        k1gvv_s = ee.Image(gee_s1_filtered.select('VV_gamma0surf').reduce(ee.Reducer.mean(), parallelScale=24))
+        k1gvv_v = ee.Image(gee_s1_filtered.select('VV_gamma0vol').reduce(ee.Reducer.mean(), parallelScale=24))
+        k1gvh_v = ee.Image(gee_s1_filtered.select('VH_gamma0vol').reduce(ee.Reducer.mean(), parallelScale=24))
+        k2gvv_v = ee.Image(gee_s1_filtered.select('VV_gamma0vol').reduce(ee.Reducer.stdDev(), parallelScale=24))
+        k1gvh_s = ee.Image(gee_s1_filtered.select('VH_gamma0surf').reduce(ee.Reducer.mean(), parallelScale=24))
         k2gvv_s = ee.Image(gee_s1_filtered.select('VV_gamma0surf').reduce(ee.Reducer.stdDev(), parallelScale=24))
+        k2gvh_s = ee.Image(gee_s1_filtered.select('VH_gamma0surf').reduce(ee.Reducer.stdDev(), parallelScale=24))
         # k3gvv_s = ee.Image(gee_s1_ln.select('VV_gamma0surf').reduce(ee.Reducer.skew(), parallelScale=24))
         # k4gvv_s = ee.Image(gee_s1_ln.select('VV_gamma0surf').reduce(ee.Reducer.kurtosis(), parallelScale=24))
         # mean_gvv_s = ee.Image(gee_s1_lin.select('VV_gamma0surf').reduce(ee.Reducer.mean(), parallelScale=24))
@@ -1828,31 +1833,44 @@ class GEE_extent(object):
         # self.S1_SIG0_VV_db = s1_sig0_vv
         self.S1_G0VOL_VV_db = s1_g0vol_vv
         self.S1G0VOLMEAN_VV = ee.Image(10).multiply(mean_gvv_v.log10()).copyProperties(mean_gvv_v)
+        self.S1_G0VOL_VH_db = s1_g0vol_vh
+        self.S1G0VOLMEAN_VH = ee.Image(10).multiply(mean_gvh_v.log10()).copyProperties(mean_gvh_v)
         self.S1_G0SURF_VV_db = s1_g0surf_vv
         self.S1_G0SURF_VH_db = s1_g0surf_vh
         self.S1G0SURFMEAN_VV = ee.Image(10).multiply(mean_gvv_s.log10()).copyProperties(mean_gvv_s)
         self.S1G0SURFMEAN_VH = ee.Image(10).multiply(mean_gvh_s.log10()).copyProperties(mean_gvh_s)
-        self.K1G0VV_V = k1gvv_s
-        self.K2G0VV_V = k2gvv_s
+        self.K1G0VV_V = k1gvv_v
+        self.K1G0VH_V = k1gvh_v
+        self.K2G0VV_V = k2gvv_v
+        self.K1G0VH_S = k1gvh_s
+        self.K2G0VV_S = k2gvv_s
+        self.K2G0VH_S = k2gvh_s
 
     def estimate_SM_GBR_1step(self):
         # load GBR models
-        from pysmm.no_GLDAS_decisiontree_GEE__1step import tree as GBR_tree
+        from pysmm.no_GLDAS_decisiontree_GEE__1step_w_grapex_data import tree as GBR_tree
         import sys
 
         g0_v_vv = self.S1_G0VOL_VV_db
+        g0_v_vh = self.S1_G0VOL_VH_db
         g0_s_vv = self.S1_G0SURF_VV_db
         g0_s_vh = self.S1_G0SURF_VH_db
         dg0_v_vv = g0_v_vv.subtract(self.S1G0VOLMEAN_VV)
+        dg0_v_vh = g0_v_vh.subtract(self.S1G0VOLMEAN_VH)
         dg0_s_vv = g0_s_vv.subtract(self.S1G0SURFMEAN_VV)
         dg0_s_vh = g0_s_vh.subtract(self.S1G0SURFMEAN_VH)
         g0_v_vv_k1 = self.K1G0VV_V
+        g0_v_vh_k1 = self.K1G0VH_V
         g0_v_vv_k2 = self.K2G0VV_V
+        g0_s_vh_k1 = self.K1G0VH_S
+        g0_s_vv_k2 = self.K2G0VV_S
+        g0_s_vh_k2 = self.K2G0VH_S
         crops = self.CROPS_COVER
         grass = self.GRASS_COVER
         moss = self.MOSS_COVER
         l8b1 = self.L8_IMG.select('B1')
         l8b2 = self.L8_IMG.select('B2')
+        l8b2med = self.L8_MEAN.select('B2_median')
         l8b3 = self.L8_IMG.select('B3')
         l8b3med = self.L8_MEAN.select('B3_median')
         l8b4 = self.L8_IMG.select('B4')
@@ -1860,8 +1878,11 @@ class GEE_extent(object):
         l8b5 = self.L8_IMG.select('B5')
         l8b5med = self.L8_MEAN.select('B5_median')
         l8b6 = self.L8_IMG.select('B6')
-        l8b7med = self.L8_MEAN.select('B7_median')
+        l8b6med = self.L8_MEAN.select('B6_median')
+        l8b7 = self.L8_IMG.select('B7')
         l8b10 = self.L8_IMG.select('B10')
+        l8b10med = self.L8_MEAN.select('B10_median')
+        l8b11 = self.L8_IMG.select('B11')
         l8dt = self.L8_DDATE
         ndvi = self.EVI_IMG
         ndvi_med = self.EVI_MEAN
@@ -1870,26 +1891,19 @@ class GEE_extent(object):
         sand = self.SAND
 
         input_image1 = ee.Image([dg0_v_vv.toFloat(),
+                                 dg0_v_vh.toFloat(),
                                  g0_s_vv.toFloat(),
-                                 g0_s_vh.toFloat(),
                                  dg0_s_vv.toFloat(),
-                                 dg0_s_vh.toFloat(),
                                  g0_v_vv_k1.toFloat(),
-                                 g0_v_vv_k2.toFloat(),
+                                 g0_s_vh_k2.toFloat(),
                                  crops.toFloat(),
                                  grass.toFloat(),
                                  moss.toFloat(),
                                  l8b1.toFloat(),
-                                 l8b2.toFloat(),
-                                 l8b3.toFloat(),
-                                 l8b3med.toFloat(),
                                  l8b4.toFloat(),
-                                 l8b4med.toFloat(),
                                  l8b5.toFloat(),
-                                 l8b5med.toFloat(),
                                  l8b6.toFloat(),
-                                 l8b7med.toFloat(),
-                                 l8b10.toFloat(),
+                                 l8b6med.toFloat(),
                                  l8dt.toFloat(),
                                  ndvi.toFloat(),
                                  ndvi_med.toFloat(),
@@ -1897,11 +1911,9 @@ class GEE_extent(object):
                                  clay.toFloat(),
                                  sand.toFloat()])
 
-        input_image1 = input_image1.rename(['dg0_v_vv', 'g0_s_vv', 'g0_s_vh', 'dg0_s_vv', 'dg0_s_vh',
-                                            'g0_v_vv_k1', 'g0_v_vv_k2', 'crops', 'grass', 'moss', 'l8_b1',
-                                            'l8_b2', 'l8_b3', 'l8_b3_med', 'l8_b4', 'l8_b4_med', 'l8_b5',
-                                            'l8_b5_med', 'l8_b6', 'l8_b7_med', 'l8_b10', 'l8_dt', 'ndvi',
-                                            'ndvi_med', 'bulk', 'clay', 'sand'])
+        input_image1 = input_image1.rename(['dg0_v_vv',  'dg0_v_vh',  'g0_s_vv',  'dg0_s_vv',  'k1_v_vv',
+                                            'k2_s_vh', 'crops', 'grass', 'moss', 'l8b1', 'l8b4', 'l8b5',
+                                            'l8b6', 'l8b6_med', 'l8dt','ndvi', 'ndvi_med', 'bulk', 'clay', 'sand'])
 
         ipt_img_mask1 = input_image1.mask().reduce(ee.Reducer.allNonZero())
 
