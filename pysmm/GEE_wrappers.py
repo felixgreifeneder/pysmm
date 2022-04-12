@@ -2350,18 +2350,19 @@ class GEE_extent(object):
                           '_' + str(abs(tmpcoords[0][2][1])) + \
                           '_' + str(self.sampling) + '_' + str(doi.year)
         mean_asset_path = mean_asset_path.replace('.', '')
-        gee_l8_mean = ee.Image('users/felixgreifeneder/' + mean_asset_path)
+        gee_l8_mean = ee.Image('projects/ee-felixgreifeneder/assets/' + mean_asset_path)
         try:
             gee_l8_mean.getInfo()
             print('L8 median exists')
         except:
             # compute median
-            gee_l8_mean = gee_l8_collection.filterDate(str(doi.year) + '-01-01', str(doi.year) + '-12-31') \
+            # TODO l8 median is now based on the current year - 1. This has to be applied also for training
+            gee_l8_mean = gee_l8_collection.filterDate(str(doi.year-1) + '-01-01', str(doi.year-1) + '-12-31') \
                 .reduce(ee.Reducer.median(), parallelScale=16)
 
             #export asset
             self.GEE_2_asset(raster=gee_l8_mean, name=mean_asset_path, timeout=False, outdir='')
-            gee_l8_mean = ee.Image('users/felixgreifeneder/' + mean_asset_path)
+            gee_l8_mean = ee.Image('projects/ee-felixgreifeneder/assets/' + mean_asset_path)
 
         def addDate(image2):
             date_img = ee.Image(image2.date().difference(doi.strftime('%Y-%m-%dT%H:%M:%S'), 'second')).abs().float().rename(
@@ -2369,7 +2370,7 @@ class GEE_extent(object):
             return image2.addBands(date_img)
 
         # create mosaic for the doi
-        gee_l8_date = gee_l8_collection_all.filterDate((doi - dt.timedelta(days=40)).strftime('%Y-%m-%d'),
+        gee_l8_date = gee_l8_collection_all.filterDate((doi - dt.timedelta(days=90)).strftime('%Y-%m-%d'),
                                                        (doi + dt.timedelta(days=40)).strftime('%Y-%m-%d'))
         gee_l8_date = gee_l8_date.map(addDate)
         gee_l8_date = gee_l8_date.qualityMosaic('Ddate').float()
@@ -2433,18 +2434,19 @@ class GEE_extent(object):
                           '_' + str(abs(tmpcoords[0][2][1])) + \
                           '_' + str(self.sampling) + '_' + str(doi.year)
         mean_asset_path = mean_asset_path.replace('.', '')
-        evi_mean = ee.Image('users/felixgreifeneder/' + mean_asset_path)
+        evi_mean = ee.Image('projects/ee-felixgreifeneder/assets/' + mean_asset_path)
         try:
             evi_mean.getInfo()
             print('EVI median exists')
         except:
             # compute avg
-            evi_mean = evi_collection.filterDate(str(doi.year) + '-01-01', str(doi.year) + '-12-31') \
+            # TODO median evi is now based on current year-1 - this has to be implemented also for training
+            evi_mean = evi_collection.filterDate(str(doi.year-1) + '-01-01', str(doi.year-1) + '-12-31') \
                 .reduce(ee.Reducer.median(), parallelScale=16)
 
             # export asset
             self.GEE_2_asset(raster=evi_mean, name=mean_asset_path, timeout=False, outdir='')
-            evi_mean = ee.Image('users/felixgreifeneder/' + mean_asset_path)
+            evi_mean = ee.Image('projects/ee-felixgreifeneder/assets/' + mean_asset_path)
 
         # fiter
         # filter
@@ -2506,9 +2508,9 @@ class GEE_extent(object):
             outdir = self.workdir
 
         if outdir != '':
-            impath = 'users/felixgreifeneder/' + outdir + '/' + name
+            impath = 'projects/ee-felixgreifeneder/assets/' + outdir + '/' + name
         else:
-            impath = 'users/felixgreifeneder/' + name
+            impath = 'projects/ee-felixgreifeneder/assets/' + name
 
         try:
             file_avail = ee.Image(impath)
@@ -2537,3 +2539,33 @@ class GEE_extent(object):
                     break
             else:
                 print('Export completed')
+
+    def GEE_2_drive(self, outdir=None, raster='ESTIMATED_SM', name='SM', timeout=True):
+        # Export GEE rasters as asset - specify raster as string
+
+        if isinstance(raster, str):
+            geds = self.__getattribute__(raster)
+        else:
+            geds = raster
+
+        if outdir is None:
+            outdir = self.workdir
+
+        file_exp = ee.batch.Export.image.toDrive(image=geds, description='fileexp' + name,
+                                                 folder=outdir,
+                                                 fileNamePrefix=name,
+                                                 region=self.roi.getInfo()['coordinates'],
+                                                 scale=self.sampling,
+                                                 maxPixels=1000000000000)
+
+        file_exp.start()
+
+        start = time.time()
+
+        while file_exp.active():
+            time.sleep(2)
+            if timeout and (time.time() - start) > 4800:
+                success = 0
+                break
+        else:
+            print('Export completed')

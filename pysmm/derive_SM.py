@@ -103,7 +103,8 @@ def get_map(minlon, minlat, maxlon, maxlat,
             GEE_interface.estimate_SM_GBR_1step()
 
             if GEE_interface.ESTIMATED_SM is not None:
-                GEE_interface.GEE_2_asset(name=outname, timeout=False)
+                #GEE_interface.GEE_2_asset(name=outname, timeout=False)
+                GEE_interface.GEE_2_drive(name=outname, timeout=False)
 
         GEE_interface = None
 
