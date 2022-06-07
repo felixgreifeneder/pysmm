@@ -721,7 +721,7 @@ class GEE_pt(object):
             return image.updateMask(treemask.And(watermask))
 
         # load collection
-        gee_l8_collection = ee.ImageCollection('LANDSAT/LC08/C01/T1_SR')  # .map(setresample)
+        gee_l8_collection = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')  # .map(setresample)
 
         # filter collection
         gee_roi = ee.Geometry.Point(self.lon, self.lat).buffer(self.buffer)
@@ -732,15 +732,15 @@ class GEE_pt(object):
         gee_l8_mpd = gee_l8_fltd.map(createAvg)
         tmp = gee_l8_mpd.getInfo()
 
-        b1 = np.array([x['properties']['result']['B1'] for x in tmp['features']], dtype=np.float)
-        b2 = np.array([x['properties']['result']['B2'] for x in tmp['features']], dtype=np.float)
-        b3 = np.array([x['properties']['result']['B3'] for x in tmp['features']], dtype=np.float)
-        b4 = np.array([x['properties']['result']['B4'] for x in tmp['features']], dtype=np.float)
-        b5 = np.array([x['properties']['result']['B5'] for x in tmp['features']], dtype=np.float)
-        b6 = np.array([x['properties']['result']['B6'] for x in tmp['features']], dtype=np.float)
-        b7 = np.array([x['properties']['result']['B7'] for x in tmp['features']], dtype=np.float)
-        b10 = np.array([x['properties']['result']['B7'] for x in tmp['features']], dtype=np.float)
-        b11 = np.array([x['properties']['result']['B7'] for x in tmp['features']], dtype=np.float)
+        b1 = np.array([x['properties']['result']['SR_B1'] for x in tmp['features']], dtype=np.float)
+        b2 = np.array([x['properties']['result']['SR_B2'] for x in tmp['features']], dtype=np.float)
+        b3 = np.array([x['properties']['result']['SR_B3'] for x in tmp['features']], dtype=np.float)
+        b4 = np.array([x['properties']['result']['SR_B4'] for x in tmp['features']], dtype=np.float)
+        b5 = np.array([x['properties']['result']['SR_B5'] for x in tmp['features']], dtype=np.float)
+        b6 = np.array([x['properties']['result']['SR_B6'] for x in tmp['features']], dtype=np.float)
+        b7 = np.array([x['properties']['result']['SR_B7'] for x in tmp['features']], dtype=np.float)
+        b10 = np.array([x['properties']['result']['SR_B7'] for x in tmp['features']], dtype=np.float)
+        b11 = np.array([x['properties']['result']['SR_B7'] for x in tmp['features']], dtype=np.float)
 
         ge_dates = np.array([dt.datetime.strptime(x['id'][12::], '%Y%m%d') for x in tmp['features']])
 
@@ -1868,18 +1868,18 @@ class GEE_extent(object):
         crops = self.CROPS_COVER
         grass = self.GRASS_COVER
         moss = self.MOSS_COVER
-        l8b1 = self.L8_IMG.select('B1')
-        l8b2 = self.L8_IMG.select('B2')
-        l8b2med = self.L8_MEAN.select('B2_median')
-        l8b3 = self.L8_IMG.select('B3')
-        l8b3med = self.L8_MEAN.select('B3_median')
-        l8b4 = self.L8_IMG.select('B4')
-        l8b4med = self.L8_MEAN.select('B4_median')
-        l8b5 = self.L8_IMG.select('B5')
-        l8b5med = self.L8_MEAN.select('B5_median')
-        l8b6 = self.L8_IMG.select('B6')
-        l8b6med = self.L8_MEAN.select('B6_median')
-        l8b7 = self.L8_IMG.select('B7')
+        l8b1 = self.L8_IMG.select('SR_B1')
+        l8b2 = self.L8_IMG.select('SR_B2')
+        l8b2med = self.L8_MEAN.select('SR_B2_median')
+        l8b3 = self.L8_IMG.select('SR_B3')
+        l8b3med = self.L8_MEAN.select('SR_B3_median')
+        l8b4 = self.L8_IMG.select('SR_B4')
+        l8b4med = self.L8_MEAN.select('SR_B4_median')
+        l8b5 = self.L8_IMG.select('SR_B5')
+        l8b5med = self.L8_MEAN.select('SR_B5_median')
+        l8b6 = self.L8_IMG.select('SR_B6')
+        l8b6med = self.L8_MEAN.select('SR_B6_median')
+        l8b7 = self.L8_IMG.select('SR_B7')
         l8b10 = self.L8_IMG.select('B10')
         l8b10med = self.L8_MEAN.select('B10_median')
         l8b11 = self.L8_IMG.select('B11')
@@ -2199,7 +2199,9 @@ class GEE_extent(object):
             # image = image.updateMask(image.select('radsat_qa').eq(2))
             return image.clip(self.roi)
 
-        gee_l8_collection_all = ee.ImageCollection('LANDSAT/LC08/C01/T1_SR')
+        gee_l8_collection_all = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
+        gee_l8_10_11 = ee.ImageCollection("LANDSAT/LC08/C02/T1_TOA").select(['B10', 'B11'])
+        gee_l8_collection_all = gee_l8_collection_all.combine(gee_l8_10_11)
 
         # apply landsat mask
         gee_l8_collection_all = gee_l8_collection_all.map(mask)#.select(['B4', 'B5', 'B11'])
@@ -2332,7 +2334,9 @@ class GEE_extent(object):
             # image = image.updateMask(image.select('radsat_qa').eq(2))
             return image.clip(self.roi)
 
-        gee_l8_collection_all = ee.ImageCollection('LANDSAT/LC08/C01/T1_SR')
+        gee_l8_collection_all = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
+        gee_l8_10_11 = ee.ImageCollection("LANDSAT/LC08/C02/T1_TOA").select(['B10', 'B11'])
+        gee_l8_collection_all = gee_l8_collection_all.combine(gee_l8_10_11)
 
         # apply landsat mask
         gee_l8_collection = gee_l8_collection_all.map(mask)#.select(['B4', 'B5', 'B11'])
